@@ -16,3 +16,4 @@ stepwise
 venv
 .idea
 *.sqlite3
+*.zip
