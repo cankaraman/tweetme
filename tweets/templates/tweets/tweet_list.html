@@ -1,6 +1,87 @@
 {% extends "base.html" %}
+{% block script %}
+<script>
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+$(document).ready(function(){
+    console.log("heyyy");
+    var query = getParameterByName('q')
+    var tweetList = [];
+
+    function parseTweets(){
+        if (tweetList == 0) {
+            $("#tweet-container").text("No tweets currently found")
+
+        } else {
+            $.each(tweetList, function(key,value){
+                var tweetUser = value.user;
+                var tweetContent = value.content;
+                $("#tweet-container").append(
+                    "<div class=\"media\"><div class=\"media-body\">"+ tweetContent + "<br/> via " + tweetUser.username + " | " + "<a href='#'>View</a>" + "</div></div><hr/>" 
+
+                )
+            })
+        }
+    }
+
+
+    function fetchTweets(){
+        $.ajax({
+            url: "/api/tweet/",
+            data: {
+                "q": query
+            },
+            method: "GET",
+            success: function(data){
+                tweetList = data
+                parseTweets()
+            },
+            error: function(data){
+                console.log("error")
+                console.log(data)
+            }
+        })
+
+    }
+
+    fetchTweets()
+
+    $("#tweet-form").submit(function(event){
+        var this_ = $(this)
+
+        var formData = this_.serialize()
+        event.preventDefault()
+        $.ajax({
+            url: "/api/tweet/create",
+            data: formData,
+            method: "POST",
+            success: function(data){
+                console.log(data)
+                fetchTweets()
+            },
+            error: function(data){
+                console.log("error")
+                console.log(data.statusText)
+                console.log(data.status)
+            }
+        })
+
+    })
+
+});
+</script>
+{% endblock script %}
 
 {% block content  %}
+
 <div class="row">
     <div class="col-sm-3 col-xs-12" >
         <h1>{{ request.user }}</h1>
@@ -8,31 +89,33 @@
     <div class="col-sm-9">
         {% if not request.GET.q %}
         <div class="">
-            {% include "tweets/form.html" with form=create_form action_url=create_url btn_title="Tweet" %}
+            {% include "tweets/form.html" with form=create_form action_url=create_url btn_title="Tweet" form_id="tweet-form" %}
 
         </div>
         <hr/>
         {% endif %}
 
-        {% for obj in object_list %}
-        <div class="media">
-            {% if obejct.image %}
-            <img class="mr-3" src="..." alt="Generic placeholder image">
-            {% endif %}
-            <div class="media-body">
-                <p>{{ obj.content}}<br/>
-                via {{ obj.user}} | {{ obj.timestamp|timesince }} ago | <a href="{{ obj.get_absolute_url }}">View</a> </p><br/><br/> 
-            </div>
-        </div>
-        <hr/>
+        <div id="tweet-container"> </div>
 
-        {% empty %}
-        {% if request.GET.q %}
-        <p>No tweets found</p>
-        {% else %}
-        <p>No tweets yet.</p>
-        {% endif %}
-        {% endfor %}
+        <!-- {% for obj in object_list %} -->
+        <!-- <div class="media"> -->
+        <!--     {% if obejct.image %} -->
+        <!--     <img class="mr-3" src="..." alt="Generic placeholder image"> -->
+        <!--     {% endif %} -->
+        <!--     <div class="media-body"> -->
+        <!--         <p>{{ obj.content}}<br/> -->
+        <!--         via {{ obj.user}} | {{ obj.timestamp|timesince }} ago | <a href="{{ obj.get_absolute_url }}">View</a> </p><br/><br/> --> 
+        <!--     </div> -->
+        <!-- </div> -->
+        <!-- <hr/> -->
+
+        <!-- {% empty %} -->
+        <!-- {% if request.GET.q %} -->
+        <!-- <p>No tweets found</p> -->
+        <!-- {% else %} -->
+        <!-- <p>No tweets yet.</p> -->
+        <!-- {% endif %} -->
+        <!-- {% endfor %} -->
 
     </div>
 </div>
