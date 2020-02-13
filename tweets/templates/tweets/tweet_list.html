@@ -59,12 +59,31 @@ $(document).ready(function(){
     }
 
     fetchTweets()
+    
+    var charStart = 140;
+    var charCurrent = 0;
 
-    $("#tweet-form").submit(function(event){
-        var this_ = $(this)
+    $("#tweet-form").append("<span id='tweetCharsLeft'>" + charStart + "</span>")
+    $("#tweet-form").keyup(function(e){
+        var tweetValue = $(this).serializeArray()[1].value.length;
+        charCurrent = charStart - tweetValue;
+        spanChars = $("#tweetCharsLeft");
+        spanChars.text(charCurrent);
+         
+        if (charCurrent > 0){
+            spanChars.removeClass("grey-color")
+            spanChars.removeClass("red-color")
+        } else if (charCurrent == 0){
+            spanChars.removeClass("red-color")
+            spanChars.addClass("grey-color")
+        } else if (charCurrent < 0){
+            spanChars.removeClass("grey-color")
+            spanChars.addClass("red-color")
+        }
 
-        var formData = this_.serialize()
-        event.preventDefault()
+    })
+
+    function createTweet(formData){
         $.ajax({
             url: "/api/tweet/create",
             data: formData,
@@ -80,6 +99,19 @@ $(document).ready(function(){
                 console.log(data.status)
             }
         })
+
+    }
+
+    $("#tweet-form").submit(function(event){
+        event.preventDefault()
+        var this_ = $(this)
+        var formData = this_.serialize()
+        if (charCurrent >= 0){
+            createTweet(formData);
+        }
+        else {
+            console.log("tweet too long");
+        }
 
     })
 
