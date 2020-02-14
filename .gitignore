@@ -17,3 +17,4 @@ venv
 .idea
 *.sqlite3
 *.zip
+*/migrations
