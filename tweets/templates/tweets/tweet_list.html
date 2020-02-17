@@ -16,6 +16,16 @@ $(document).ready(function(){
     var tweetList = [];
     var nextTweetUrl;
 
+    function updateHashLinks(){
+        $(".media-body").each(function(data){
+
+            var hastagRegex = /(^|\s)#([\w\d-]+)/g
+            var newText = $(this).html().replace(hastagRegex, "$1<a href='/tags/$2/'>#$2</a>")
+            $(this).html(newText)
+        })
+
+    }
+
     function attachTweet(tweetValue){
 
         var dateDisplay = tweetValue.date_display;
@@ -23,7 +33,7 @@ $(document).ready(function(){
         var tweetContent = tweetValue.content;
         var tweetFormattedHtml = "<div class=\"media\"><div class=\"media-body\">"+ tweetContent + "<br/> via " +"<a href='"+ tweetUser.url +"'>"+ tweetUser.username +"</a>" + " | " + dateDisplay + " | " + "<a href='#'>View</a>" + "</div></div><hr/>" 
 
-        $("#tweet-container").prepend(tweetFormattedHtml)
+        $("#tweet-container").append(tweetFormattedHtml)
 
     }
 
@@ -62,6 +72,7 @@ $(document).ready(function(){
                 }
                 
                 parseTweets()
+                updateHashLinks()
             },
             error: function(data){
                 console.log("error")
@@ -90,7 +101,6 @@ $(document).ready(function(){
         charCurrent = charStart - tweetValue;
         spanChars = $("#tweetCharsLeft");
         spanChars.text(charCurrent);
-         
         if (charCurrent > 0){
             spanChars.removeClass("grey-color")
             spanChars.removeClass("red-color")
@@ -104,15 +114,18 @@ $(document).ready(function(){
 
     })
 
-    function createTweet(formData){
+    function createTweet(formData, this_){
         $.ajax({
             url: "/api/tweet/create",
             data: formData,
             method: "POST",
             success: function(data){
                 // console.log(data)
+                // clear text field
                 this_.find("input[type=text], textarea").val("")
                 attachTweet(data)
+                updateHashLinks()
+
             },
             error: function(data){
                 console.log("error")
@@ -128,7 +141,7 @@ $(document).ready(function(){
         var this_ = $(this)
         var formData = this_.serialize()
         if (charCurrent >= 0){
-            createTweet(formData);
+            createTweet(formData, this_);
         }
         else {
             console.log("tweet too long");
