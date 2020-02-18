@@ -6,10 +6,17 @@ from django.urls import reverse
 
 class TweetManager(models.Manager):
     def retweet(self, user, parent_obj):
+        # in case of retweet of retweet: retweet original tweet not the retweet
+        # itself
         if parent_obj.parent:
             og_parent = parent_obj.parent
         else:
             og_parent = parent_obj
+
+        # don't let retweeting of same tweet by same user
+        qs = self.get_queryset().filter(user=user, parent=og_parent)
+        if qs.exists():
+            return None
 
         obj = self.model(
             parent=og_parent,

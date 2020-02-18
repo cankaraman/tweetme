@@ -19,8 +19,8 @@ $(document).ready(function(){
     function updateHashLinks(){
         $(".media-body").each(function(data){
 
-            var hastagRegex = /(^|\s)#([\w\d-]+)/g
-            var newText = $(this).html().replace(hastagRegex, "$1<a href='/tags/$2/'>#$2</a>")
+            var hashtagRegex = /(^|.)#([\w\d-]+)/g
+            var newText = $(this).html().replace(hashtagRegex, "$1<a href='/tags/$2/'>#$2</a>")
             $(this).html(newText)
         })
 
@@ -37,10 +37,10 @@ $(document).ready(function(){
         if (retweet && tweetValue.parent){
 
             mainTweet = tweetValue.parent;
-            tweetFormattedHtml = "<div class=\"media\"><div class=\"media-body\">"+ "<span class='grey-color'>" + "Retweet via "+ tweetUser.username + " on " +  dateDisplay + "</span>" + "<br/>" + mainTweet.content + "<br/> via " +"<a href='"+ tweetUser.url +"'>"+ mainTweet.user.username +"</a>" + " | " + mainTweet.date_display + " | " + "<a href='/tweet/" + mainTweet.id + "'>View</a>" + "</div></div><hr/>" 
+            tweetFormattedHtml = "<div class=\"media\"><div class=\"media-body\">"+ "<span class='grey-color'>" + "Retweet via "+ tweetUser.username + " on " +  dateDisplay + "</span>" + "<br/>" + mainTweet.content + "<br/> via " +"<a href='"+ tweetUser.url +"'>"+ mainTweet.user.username +"</a>" + " | " + mainTweet.date_display + " | " + "<a href='/tweet/" + mainTweet.id + "'>View</a>" +" | "+ "<a href='/tweet/" + mainTweet.id +"/retweet" +  "'>Retweet</a>" + "</div></div><hr/>" 
         } else {
 
-            tweetFormattedHtml = "<div class=\"media\"><div class=\"media-body\">"+ tweetContent + "<br/> via " +"<a href='"+ tweetUser.url +"'>"+ tweetUser.username +"</a>" + " | " + dateDisplay + " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>" + "</div></div><hr/>" 
+            tweetFormattedHtml = "<div class=\"media\"><div class=\"media-body\">"+ tweetContent + "<br/> via " +"<a href='"+ tweetUser.url +"'>"+ tweetUser.username +"</a>" + " | " + dateDisplay + " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>" +" | " + "<a href='/tweet/" + tweetValue.id + "/retweet" + "'>Retweet</a>" + "</div></div><hr/>" 
         }
         if (prepend){
             $("#tweet-container").prepend(tweetFormattedHtml)
