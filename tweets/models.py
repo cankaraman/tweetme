@@ -1,7 +1,11 @@
 from django.db import models
 from django.conf import settings
-from .validators import validate_content
 from django.urls import reverse
+from django.db.models.signals import post_save
+import re
+
+from .validators import validate_content
+from hashtags.signals import parsed_hashtags
 
 
 class TweetManager(models.Manager):
@@ -51,3 +55,21 @@ class Tweet(models.Model):
     #     if content == "dbc":
     #         raise ValidationError("Cannot be ABC")
     #     return super(Tweet, self).clean(*args, **kwargs)
+
+
+def tweet_save_receiver(sender, instance, created, *args, **kwargs):
+    if created and not instance.parent:
+        # notify user
+        user_regex = r"@(?P<username>[\w.@+-]+)"
+        usernames = re.findall(user_regex, instance.content)
+        # send user notification here
+
+        hash_regex = r"#(?P<hashtag>[\w\d-]+)"
+        hashtags = re.findall(hash_regex, instance.content)
+        # send user notification hashtag here
+        parsed_hashtags.send(sender=instance.__class__, hashtag_list=hashtags)
+
+        [usernames, hashtags]
+
+
+post_save.connect(tweet_save_receiver, sender=Tweet)
