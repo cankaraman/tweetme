@@ -1,9 +1,28 @@
 from rest_framework import generics
-from tweets.models import Tweet
-from .serializers import TweetModelSerializer
 from django.db.models import Q
 from rest_framework import permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from tweets.models import Tweet
+from .serializers import TweetModelSerializer
 from .pagination import StandardResultPagination
+
+
+class RetweetAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, format=None):
+        tweet_qs = Tweet.objects.filter(pk=pk)
+        message = "Not allowed"
+        if tweet_qs.exists() and tweet_qs.count() == 1:
+            new_tweet = Tweet.objects.retweet(request.user, tweet_qs.first())
+            if new_tweet is not None:
+                data = TweetModelSerializer(new_tweet).data
+                return Response(data)
+            message = "Cannot retweet the same tweet"
+
+        return Response({"message": message}, status=400)
 
 
 class TweetCreateAPIView(generics.CreateAPIView):
