@@ -36,6 +36,7 @@
                 {% block content %} 
                 {% endblock content %}
             </div>
+            {% include "reply-modal.html" %}
         </div>
         <script charset="utf-8">
     function getParameterByName(name, url) {
@@ -83,6 +84,26 @@
                     console.log("like error")
                     console.log(data)
                 }
+            })
+        })
+        $(document.body).on("click", ".tweet-reply", function(e){
+            //e.preventDefault()
+            //console.log("reply clicked")
+            //var url = "/api" + $(this).attr("href")
+            e.preventDefault()
+            var this_ = $(this)
+
+            var parentId = this_.attr("data-id")
+            var username = this_.attr("data-user")
+            var content = this_.parent().parent().find(".content").text()
+            console.log(content)
+            $("#replyModal").modal({})
+            $("#replyModal textarea").after("<input type='hidden' name='parent_id' value='" + parentId + "' />")
+            $("#replyModal textarea").after("<input type='hidden' name='reply' value='" + true + "' />")
+            $("#replyModal textarea").val("@"+username)
+            $("#replyModal #replyModalLabel").text("Reply to " + content)
+            $("#replyModal").on("shown.bs.modal", function(){
+                $("textarea#tweetReplyArea").focus()
             })
         })
 
@@ -142,13 +163,13 @@
                 likeVerb = "Liked"
             }
 
-            var tweetContent = tweetValue.content + "<br/>"
+            var tweetContent = "<span class='content'>" + tweetValue.content + "<br/></span>"
             var viewButton = " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>"
             var userName = " via <a href='"+ tweetValue.user.url +"'>"+ tweetValue.user.username +"</a>" 
             var dateDisplay = " | " + tweetValue.date_display 
             var retweetButton = " | " + "<a class='retweetBtn' href='/tweet/" + tweetValue.id + "/retweet" + "'>Retweet</a>"
             var likeButton = " | <a href='#' class='tweet-like' data-id='"+ tweetValue.id +"'>"+ likeVerb + " ("+ tweetValue.likes +")</a>"
-            var replyButton = " | " + "<a class='tweet-reply' href='/tweet/" + tweetValue.id + "/reply" + "'>Reply</a>"
+            var replyButton = " | " + "<a class='tweet-reply' data-id='"+ tweetValue.id +"' data-user='"+ tweetValue.user.username +" 'href='#'>Reply</a>"
 
             formattedTweetContent = tweetContent  + userName +  dateDisplay + viewButton + retweetButton + likeButton + replyButton
 
@@ -230,11 +251,11 @@
         var charStart = 140;
         var charCurrent = 0;
 
-        $("#tweet-form").append("<span id='tweetCharsLeft'>" + charStart + "</span>")
-        $("#tweet-form").keyup(function(e){
-            var tweetValue = $(this).serializeArray()[1].value.length;
-            charCurrent = charStart - tweetValue;
-            spanChars = $("#tweetCharsLeft");
+        $(".tweet-form").append("<span class='tweetCharsLeft' style='margin-left: 20px'>" + charStart + " left</span>")
+        $(".tweet-form  textarea").keyup(function(e){
+            var tweetValue = $(this).val()
+            charCurrent = charStart - tweetValue.length;
+            var spanChars = $(this).parent().parent().parent().find("span.tweetCharsLeft");
             spanChars.text(charCurrent);
             if (charCurrent > 0){
                 spanChars.removeClass("grey-color")
@@ -251,27 +272,27 @@
 
                 function createTweet(formData, this_){
                 $.ajax({
-                url: "/api/tweet/create",
-                data: formData,
-                method: "POST",
-                success: function(data){
-                // console.log(data)
-                // clear text field
-                this_.find("input[type=text], textarea").val("")
-                attachTweet(data, true)
-                updateHashLinks()
-
-                },
-                error: function(data){
-                console.log("error")
-                console.log(data.statusText)
-                console.log(data.status)
-                }
+                    url: "/api/tweet/create",
+                    data: formData,
+                    method: "POST",
+                    success: function(data){
+                        // console.log(data)
+                        // clear text field
+                        this_.find("input[type=text], textarea").val("")
+                        attachTweet(data, true)
+                        updateHashLinks()
+                        $("#replyModal").modal("hide")
+                    },
+                    error: function(data){
+                        console.log("error")
+                        console.log(data.statusText)
+                        console.log(data.status)
+                    }
                 })
 
                 }
 
-                $("#tweet-form").submit(function(event){
+                $(".tweet-form").submit(function(event){
                 event.preventDefault()
                 var this_ = $(this)
                 var formData = this_.serialize()

@@ -51,6 +51,7 @@ class TweetModelSerializer(serializers.ModelSerializer):
     parent = ParentTweetModelSerializer(read_only=True)
     likes = serializers.SerializerMethodField()
     did_like = serializers.SerializerMethodField()
+    parent_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Tweet
@@ -65,6 +66,7 @@ class TweetModelSerializer(serializers.ModelSerializer):
             "likes",
             "did_like",
             "reply",
+            "parent_id",
         ]
 
     def get_did_like(self, obj):
