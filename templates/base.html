@@ -62,9 +62,33 @@
 
         var initialUrl = tweetContainer.attr("data-url") || "/api/tweet/"
 
+
+        $(document.body).on("click", ".tweet-like", function(e){
+            e.preventDefault()
+            var this_ = $(this)
+            // this_.text("Liked")
+            tweetId = this_.attr("data-id")
+            var likeUrl = "/api/tweet/" + tweetId + "/like/"
+            $.ajax({
+                url: likeUrl,
+                method: "GET",
+                success: function(data){
+                    if (data.liked){
+                        this_.text("Liked")
+                    } else {
+                        this_.text("Unliked")
+                    }
+                },
+                error: function(data){
+                    console.log("like error")
+                    console.log(data)
+                }
+            })
+        })
+
         $(document.body).on("click", ".retweetBtn", function(e){
             e.preventDefault()
-            console.log("clicked")
+            console.log("retweet clicked")
             var url = "/api" + $(this).attr("href")
 
             $.ajax({
@@ -73,20 +97,18 @@
                 method: "GET",
                 success: function(data){
                     // if username in api call ignore
-                    if (initialUrl == "api/tweet/"){
-
+                    if (initialUrl == "/api/tweet/"){
                         attachTweet(data, true, true)
                         updateHashLinks()
                     }
-
                 },
                 error: function(data){
                     console.log("error")
                     console.log(data)
                 }
             })
-
         })
+
 
         function updateHashLinks(){
             $(".media-body").each(function(data){
@@ -102,22 +124,32 @@
 
         }
 
+        function formatTweet(tweetValue){
+            var likeVerb = "Like"
+            var tweetContent;             
+            var preContent = ""
+
+            // if it's a retwwet or a reply use the original tweet
+            if (tweetValue.parent){
+                tweetValue = tweetValue.parent;
+                preContent = "<span class='grey-color'>" + "Retweet via "+ tweetValue.user.username + " on " +  tweetValue.date_display + "</span>" + "<br/>" 
+            } 
+
+            if (tweetValue.did_like){
+                likeVerb = "Liked"
+            }
+
+            tweetContent = tweetValue.content + "<br/> via " +"<a href='"+ tweetValue.user.url +"'>"+ tweetValue.user.username +"</a>" + " | " + tweetValue.date_display + " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>" +" | " + "<a class='retweetBtn' href='/tweet/" + tweetValue.id + "/retweet" + "'>Retweet</a>" +" | <a href='#' class='tweet-like' data-id='"+ tweetValue.id +"'>"+ likeVerb + " ("+ tweetValue.likes +")</a>" 
+
+                var container = "<div class=\"media\"><div class=\"media-body\">" + preContent + tweetContent +"</div></div><hr/>" 
+                return container
+
+        }
+
         function attachTweet(tweetValue, prepend, retweet){
 
-            var dateDisplay = tweetValue.date_display;
-            var tweetUser = tweetValue.user;
-            var isRetweet = tweetValue.is_retweet
-            var tweetContent = tweetValue.content;
-            var tweetFormattedHtml; 
+            var tweetFormattedHtml = formatTweet(tweetValue)
 
-            if (retweet && tweetValue.parent){
-
-                mainTweet = tweetValue.parent;
-                tweetFormattedHtml = "<div class=\"media\"><div class=\"media-body\">"+ "<span class='grey-color'>" + "Retweet via "+ tweetUser.username + " on " +  dateDisplay + "</span>" + "<br/>" + mainTweet.content + "<br/> via " +"<a href='"+ tweetUser.url +"'>"+ mainTweet.user.username +"</a>" + " | " + mainTweet.date_display + " | " + "<a href='/tweet/" + mainTweet.id + "'>View</a>" +" | "+ "<a class='retweetBtn' href='/tweet/" + mainTweet.id +"/retweet" +  "'>Retweet</a>" + "</div></div><hr/>" 
-            } else {
-
-                tweetFormattedHtml = "<div class=\"media\"><div class=\"media-body\">"+ tweetContent + "<br/> via " +"<a href='"+ tweetUser.url +"'>"+ tweetUser.username +"</a>" + " | " + dateDisplay + " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>" +" | " + "<a class='retweetBtn' href='/tweet/" + tweetValue.id + "/retweet" + "'>Retweet</a>" + "</div></div><hr/>" 
-            }
             if (prepend){
                 tweetContainer.prepend(tweetFormattedHtml)
             } else {
