@@ -126,22 +126,33 @@
 
         function formatTweet(tweetValue){
             var likeVerb = "Like"
-            var tweetContent;             
+            var formattedTweetContent;             
             var preContent = ""
+            var isReply = tweetValue.reply
 
             // if it's a retwwet or a reply use the original tweet
-            if (tweetValue.parent){
+            if (tweetValue.parent && !isReply){
                 tweetValue = tweetValue.parent;
-                preContent = "<span class='grey-color'>" + "Retweet via "+ tweetValue.user.username + " on " +  tweetValue.date_display + "</span>" + "<br/>" 
-            } 
+                preContent = "<span class='grey-color'>" + "Retweet via "+ tweetValue.user.username + " on " +  tweetValue.date_display + "</span><br/>" 
+            } else if (tweetValue.parent && isReply){
+                preContent = "<span class='grey-color'>" + "Reply to @"+ tweetValue.parent.user.username + "</span><br/>" 
+            }
 
             if (tweetValue.did_like){
                 likeVerb = "Liked"
             }
 
-            tweetContent = tweetValue.content + "<br/> via " +"<a href='"+ tweetValue.user.url +"'>"+ tweetValue.user.username +"</a>" + " | " + tweetValue.date_display + " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>" +" | " + "<a class='retweetBtn' href='/tweet/" + tweetValue.id + "/retweet" + "'>Retweet</a>" +" | <a href='#' class='tweet-like' data-id='"+ tweetValue.id +"'>"+ likeVerb + " ("+ tweetValue.likes +")</a>" 
+            var tweetContent = tweetValue.content + "<br/>"
+            var viewButton = " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>"
+            var userName = " via <a href='"+ tweetValue.user.url +"'>"+ tweetValue.user.username +"</a>" 
+            var dateDisplay = " | " + tweetValue.date_display 
+            var retweetButton = " | " + "<a class='retweetBtn' href='/tweet/" + tweetValue.id + "/retweet" + "'>Retweet</a>"
+            var likeButton = " | <a href='#' class='tweet-like' data-id='"+ tweetValue.id +"'>"+ likeVerb + " ("+ tweetValue.likes +")</a>"
+            var replyButton = " | " + "<a class='tweet-reply' href='/tweet/" + tweetValue.id + "/reply" + "'>Reply</a>"
 
-                var container = "<div class=\"media\"><div class=\"media-body\">" + preContent + tweetContent +"</div></div><hr/>" 
+            formattedTweetContent = tweetContent  + userName +  dateDisplay + viewButton + retweetButton + likeButton + replyButton
+
+                var container = "<div class=\"media\"><div class=\"media-body\">" + preContent + formattedTweetContent +"</div></div><hr/>" 
                 return container
 
         }

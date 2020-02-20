@@ -64,6 +64,7 @@ class TweetModelSerializer(serializers.ModelSerializer):
             "parent",
             "likes",
             "did_like",
+            "reply",
         ]
 
     def get_did_like(self, obj):
