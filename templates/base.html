@@ -13,11 +13,14 @@
         <!-- <script src="{% static 'js/jquery-3.4.1.js' %}" ></script> -->
         <!-- <script src="{% static 'js/bootstrap.min.js' %}" ></script> -->
         <style>
-.red-color {
-    color: red;
-}
+        .red-color {
+            color: red;
+        }
         .grey-color {
             color: #ccc;
+        }
+        .media-focus {
+            background-color: rgba(255, 255, 0, 0.22);
         }
         </style>
         <!-- Optional JavaScript -->
@@ -39,7 +42,7 @@
             {% include "reply-modal.html" %}
         </div>
         <script charset="utf-8">
-    function getParameterByName(name, url) {
+            function getParameterByName(name, url) {
         if (!url) url = window.location.href;
         name = name.replace(/[\[\]]/g, '\\$&');
         var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
@@ -49,7 +52,7 @@
         return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
 
-    function loadTweetContainer(tweetContainerId){
+    function loadTweetContainer(tweetContainerId, fetchOneId){
         var query = getParameterByName('q')
         var tweetList = [];
         var nextTweetUrl;
@@ -150,6 +153,21 @@
             var formattedTweetContent;             
             var preContent = ""
             var isReply = tweetValue.reply
+            var replyId = tweetValue.id
+
+            // always reply to og tweet
+            if (tweetValue.parent) {
+                replyId = tweetValue.parent.id
+            }
+
+            // highlight the clicked tweet
+            var openingContainerDiv = "<div class=\"media\">"
+            if (tweetValue.id == fetchOneId) {
+                openingContainerDiv =  "<div class=\"media media-focus\">"
+                setTimeout(function(){
+                    $(".media-focus").css("background", "#fff")
+                }, 2000)
+            }
 
             // if it's a retwwet or a reply use the original tweet
             if (tweetValue.parent && !isReply){
@@ -165,15 +183,15 @@
 
             var tweetContent = "<span class='content'>" + tweetValue.content + "<br/></span>"
             var viewButton = " | " + "<a href='/tweet/" + tweetValue.id + "'>View</a>"
-            var userName = " via <a href='"+ tweetValue.user.url +"'>"+ tweetValue.user.username +"</a>" 
+            var userName = " via <a href='" + tweetValue.user.url + "'>" + tweetValue.user.username + "</a>" 
             var dateDisplay = " | " + tweetValue.date_display 
             var retweetButton = " | " + "<a class='retweetBtn' href='/tweet/" + tweetValue.id + "/retweet" + "'>Retweet</a>"
-            var likeButton = " | <a href='#' class='tweet-like' data-id='"+ tweetValue.id +"'>"+ likeVerb + " ("+ tweetValue.likes +")</a>"
-            var replyButton = " | " + "<a class='tweet-reply' data-id='"+ tweetValue.id +"' data-user='"+ tweetValue.user.username +" 'href='#'>Reply</a>"
+            var likeButton = " | <a href='#' class='tweet-like' data-id='" + tweetValue.id + "'>"+ likeVerb + " ("+ tweetValue.likes +")</a>"
+            var replyButton = " | " + "<a class='tweet-reply' data-id='" + replyId + "' data-user='" + tweetValue.user.username + " 'href='#'>Reply</a>"
 
             formattedTweetContent = tweetContent  + userName +  dateDisplay + viewButton + retweetButton + likeButton + replyButton
 
-                var container = "<div class=\"media\"><div class=\"media-body\">" + preContent + formattedTweetContent +"</div></div><hr/>" 
+                var container =  openingContainerDiv + "<div class=\"media-body\">" + preContent + formattedTweetContent +"</div></div><hr/>" 
                 return container
 
         }
@@ -238,7 +256,29 @@
 
         }
 
-        fetchTweets()
+        function fetchSingle(fetchOneId){
+            var fetchDetailUrl = "/api/tweet/" + fetchOneId + "/"
+            $.ajax({
+                url: fetchDetailUrl,
+                method: "GET",
+                success: function(data){
+                    tweetList = data.results
+                    parseTweets()
+                    updateHashLinks()
+                },
+                error: function(data){
+                    console.log("error")
+                    console.log(data)
+                }
+            })
+
+        }
+
+        if (fetchOneId){
+            fetchSingle(fetchOneId)
+        } else {
+            fetchTweets()
+        }
 
         $("#loadmore").click(function(event){
             event.preventDefault()
@@ -272,22 +312,22 @@
 
                 function createTweet(formData, this_){
                 $.ajax({
-                    url: "/api/tweet/create",
-                    data: formData,
-                    method: "POST",
-                    success: function(data){
-                        // console.log(data)
-                        // clear text field
-                        this_.find("input[type=text], textarea").val("")
-                        attachTweet(data, true)
-                        updateHashLinks()
-                        $("#replyModal").modal("hide")
-                    },
-                    error: function(data){
-                        console.log("error")
-                        console.log(data.statusText)
-                        console.log(data.status)
-                    }
+                url: "/api/tweet/create",
+                data: formData,
+                method: "POST",
+                success: function(data){
+                // console.log(data)
+                // clear text field
+                this_.find("input[type=text], textarea").val("")
+                attachTweet(data, true)
+                updateHashLinks()
+                $("#replyModal").modal("hide")
+                },
+                error: function(data){
+                console.log("error")
+                console.log(data.statusText)
+                console.log(data.status)
+                }
                 })
 
                 }

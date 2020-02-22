@@ -60,6 +60,19 @@ class Tweet(models.Model):
     class Meta:
         ordering = ["-timestamp"]
 
+    def get_parent_or_self(self):
+        the_parent = self
+        if self.parent:
+            the_parent = self.parent
+        return the_parent
+
+    def get_tweet_with_children(self):
+        parent = self.get_parent_or_self()
+        qs_children = Tweet.objects.filter(parent=parent)
+        qs_parent = Tweet.objects.filter(pk=parent.id)
+        qs = (qs_children | qs_parent).distinct()
+        return qs
+
     # validation in db
     # def clean(self, *args, **kwargs):
     #     content = self.content
