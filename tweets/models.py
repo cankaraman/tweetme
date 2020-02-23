@@ -6,6 +6,7 @@ import re
 
 from .validators import validate_content
 from hashtags.signals import parsed_hashtags
+from django.utils import timezone
 
 
 class TweetManager(models.Manager):
@@ -18,7 +19,14 @@ class TweetManager(models.Manager):
             og_parent = parent_obj
 
         # don't let retweeting of same tweet by same user
-        qs = self.get_queryset().filter(user=user, parent=og_parent)
+        qs = self.get_queryset().filter(
+            user=user, parent=og_parent).filter(
+            timestamp__year=timezone.now().year,
+            timestamp__month=timezone.now().month,
+            timestamp__day=timezone.now().day,
+            reply=False
+        )
+
         if qs.exists():
             return None
 

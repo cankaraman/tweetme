@@ -20,10 +20,14 @@ from django.conf.urls.static import static
 from .views import home
 from hashtags.views import HashTagView
 from tweets.views import TweetListView
+from tweetme.views import SearchView
+from tweets.api.views import SearchAPIView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', TweetListView.as_view(), name='home'),
+    url(r'^search/$', SearchView.as_view(), name='search'),
+    url(r'^api/search/$', SearchAPIView.as_view(), name='search-api'),
     url(r'^', include('accounts.urls', namespace='profiles')),
     url(r'^tags/(?P<hashtag>.*)/$', HashTagView.as_view(), name='hashtag'),
     url(r'^tweet/', include('tweets.urls', namespace='tweet')),
