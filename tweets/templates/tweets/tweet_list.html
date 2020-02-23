@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load recommended %}
 {% block script %}
 <script>
 
@@ -13,6 +14,10 @@ $(document).ready(function(){
 <div class="row">
     <div class="col-sm-3 col-12" >
         <h1>{{ request.user }}</h1>
+        <hr>
+        <br></br>
+        <p class="lead">Recommended Users</p>
+        {% recommended request.user %}
     </div>
     <div class="col-sm-9">
         {% if not request.GET.q %}

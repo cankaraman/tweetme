@@ -19,6 +19,7 @@ class UserDetailView(DetailView):
         context = super(UserDetailView, self).get_context_data(*args, **kwargs)
         # in the course key is "following"
         context["is_following"] = UserProfile.objects.is_following(self.request.user, self.get_object())
+        context["recommended"] = UserProfile.objects.recommended(self.request.user)
         return context
 
 
