@@ -1,6 +1,6 @@
 from .base import *
-from .production import *
 try:
+    from .production import *
     from .local import *
 except:
     print("setting import error")
