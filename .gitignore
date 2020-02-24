@@ -21,3 +21,5 @@ venv
 local.py
 production.py
 */static/
+static-storage/*
+static-serve/*
