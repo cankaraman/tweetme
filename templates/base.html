@@ -171,8 +171,9 @@
 
             // if it's a retwwet or a reply use the original tweet
             if (tweetValue.parent && !isReply){
+                var retweetUser = tweetValue.user.username
                 tweetValue = tweetValue.parent;
-                preContent = "<span class='grey-color'>" + "Retweet via "+ tweetValue.user.username + " on " +  tweetValue.date_display + "</span><br/>" 
+                preContent = "<span class='grey-color'>" + "Retweet via "+  retweetUser + " on " +  tweetValue.date_display + "</span><br/>" 
             } else if (tweetValue.parent && isReply){
                 preContent = "<span class='grey-color'>" + "Reply to @"+ tweetValue.parent.user.username + "</span><br/>" 
             }
