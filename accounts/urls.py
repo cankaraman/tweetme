@@ -1,10 +1,9 @@
-
 # from .views import tweet_detail_view, tweet_list_view
 from .views import (
     UserDetailView,
     UserFollowView
 )
-from django.conf.urls import url
+from django.conf.urls import url, include
 
 urlpatterns = [
     url(r'^(?P<username>[\w.@+-]+)/$', UserDetailView.as_view(), name='detail'),

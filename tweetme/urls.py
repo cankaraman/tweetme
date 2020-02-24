@@ -23,17 +23,20 @@ from hashtags.api.views import HashTagAPIView
 from tweets.views import TweetListView
 from tweetme.views import SearchView
 from tweets.api.views import SearchAPIView
+from accounts.views import UserRegisterView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', TweetListView.as_view(), name='home'),
     url(r'^search/$', SearchView.as_view(), name='search'),
     url(r'^api/search/$', SearchAPIView.as_view(), name='search-api'),
-    url(r'^', include('accounts.urls', namespace='profiles')),
     url(r'^tags/(?P<hashtag>.*)/$', HashTagView.as_view(), name='hashtag'),
     url(r'^api/tags/(?P<hashtag>.*)/$', HashTagAPIView.as_view(), name='hashtag-api'),
     url(r'^tweet/', include('tweets.urls', namespace='tweet')),
     url(r'^api/tweet/', include('tweets.api.urls', namespace='tweet-api')),
+    url(r'^register/$', UserRegisterView.as_view(), name='register'),
+    url(r'^', include('django.contrib.auth.urls')),
+    url(r'^', include('accounts.urls', namespace='profiles')),
     url(r'^api/', include('accounts.api.urls', namespace='profiles-api')),
 ]
 if settings.DEBUG:
