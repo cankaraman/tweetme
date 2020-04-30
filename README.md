@@ -1,3 +1,3 @@
 # tweetme
-simple tweeter clone project.
+simple twitter clone project.
 followed a udemy course
